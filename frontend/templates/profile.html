@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    .profile-avatar i {
+        font-size: 50px;
+        color: white;
+    }
+    .info-row {
+        padding: 12px 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #1a3a47;
+        width: 120px;
+        display: inline-block;
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #0e7c9e, #1a5a6e);
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 8px;
+        width: 100%;
+    }
+    .btn-logout {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 8px;
+        width: 100%;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="page-title"><i class="fas fa-user-circle"></i> My Profile</h2>
+    </div>
+</div>
+
+<div class="profile-card">
+    <div class="profile-avatar">
+        <i class="fas fa-user"></i>
+    </div>
+    
+    <h4 class="text-center mb-4">{{ user.name }}</h4>
+    
+    <div class="info-row">
+        <span class="info-label"><i class="fas fa-envelope"></i> Email:</span>
+        <span>{{ user.email }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label"><i class="fas fa-phone"></i> Phone:</span>
+        <span>{{ user.phone or 'Not provided' }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label"><i class="fas fa-user-tag"></i> Role:</span>
+        <span class="badge bg-info">{{ user.role }}</span>
+    </div>
+    
+    {% if electrician %}
+    <div class="info-row">
+        <span class="info-label"><i class="fas fa-tools"></i> Specialization:</span>
+        <span>{{ electrician.specialization or 'General' }}</span>
+    </div>
+    
+    <div class="info-row">
+        <span class="info-label"><i class="fas fa-chart-line"></i> Status:</span>
+        <span class="badge {% if electrician.status == 'Available' %}bg-success{% elif electrician.status == 'Busy' %}bg-warning{% else %}bg-danger{% endif %}">
+            {{ electrician.status }}
+        </span>
+    </div>
+    {% endif %}
+    
+    <hr>
+    
+    <button class="btn-save mb-3" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+        <i class="fas fa-edit"></i> Edit Profile
+    </button>
+    
+    <button class="btn btn-outline-primary mb-3 w-100" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+        <i class="fas fa-key"></i> Change Password
+    </button>
+    
+    <a href="{{ url_for('logout') }}" class="btn-logout">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm">
+                    <div class="mb-3">
+                        <label>Full Name</label>
+                        <input type="text" id="edit_name" class="form-control" value="{{ user.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Phone Number</label>
+                        <input type="tel" id="edit_phone" class="form-control" value="{{ user.phone or '' }}">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="updateProfile()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm">
+                    <div class="mb-3">
+                        <label>Current Password</label>
+                        <input type="password" id="current_password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>New Password (min 6 characters)</label>
+                        <input type="password" id="new_password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirm_password" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="changePassword()">Change Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateProfile() {
+    const data = {
+        name: document.getElementById('edit_name').value,
+        phone: document.getElementById('edit_phone').value
+    };
+    
+    fetch('/api/profile', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+}
+
+function changePassword() {
+    const current = document.getElementById('current_password').value;
+    const newPass = document.getElementById('new_password').value;
+    const confirm = document.getElementById('confirm_password').value;
+    
+    if(newPass !== confirm) {
+        alert('New passwords do not match!');
+        return;
+    }
+    
+    if(newPass.length < 6) {
+        alert('Password must be at least 6 characters!');
+        return;
+    }
+    
+    fetch('/api/change-password', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            current_password: current,
+            new_password: newPass
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            alert('Password changed successfully! Please login again.');
+            window.location.href = '/logout';
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+}
+</script>
+{% endblock %}

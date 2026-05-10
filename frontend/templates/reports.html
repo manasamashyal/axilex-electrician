@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .report-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1a3a47;
+    }
+    .btn-print {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+    }
+    .table-report th {
+        background: #f8f9fa;
+    }
+    .progress {
+        height: 8px;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="row mb-3">
+    <div class="col-8">
+        <h2 class="page-title"><i class="fas fa-chart-line"></i> Reports & Analytics</h2>
+    </div>
+    <div class="col-4 text-end">
+        <button class="btn-print" onclick="window.print()">
+            <i class="fas fa-print"></i> Print Report
+        </button>
+    </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="report-card text-center">
+            <i class="fas fa-users fa-2x" style="color: #667eea;"></i>
+            <div class="stat-number">{{ total_electricians }}</div>
+            <small>Electricians</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="report-card text-center">
+            <i class="fas fa-briefcase fa-2x" style="color: #f5576c;"></i>
+            <div class="stat-number">{{ active_jobs }}</div>
+            <small>Active Jobs</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="report-card text-center">
+            <i class="fas fa-tasks fa-2x" style="color: #ffc107;"></i>
+            <div class="stat-number">{{ total_tasks }}</div>
+            <small>Total Tasks</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="report-card text-center">
+            <i class="fas fa-check-circle fa-2x" style="color: #28a745;"></i>
+            <div class="stat-number">{{ completed_jobs }}</div>
+            <small>Completed</small>
+        </div>
+    </div>
+</div>
+
+<!-- Task Completion Report -->
+<div class="row">
+    <div class="col-12">
+        <div class="report-card">
+            <h5><i class="fas fa-chart-pie"></i> Task Completion Report</h5>
+            <div class="row">
+                {% for status in task_completion %}
+                <div class="col-md-4">
+                    <div class="text-center mb-3">
+                        <h4>{{ status.count }}</h4>
+                        <p>
+                            <span class="badge {% if status.status == 'Completed' %}bg-success{% elif status.status == 'In Progress' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                {{ status.status }}
+                            </span>
+                        </p>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ status.percentage }}%; background: {% if status.status == 'Completed' %}#28a745{% elif status.status == 'In Progress' %}#ffc107{% else %}#6c757d{% endif %};"></div>
+                        </div>
+                        <small>{{ status.percentage }}% of total</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Electrician Activity Report -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="report-card">
+            <h5><i class="fas fa-chart-bar"></i> Electrician Activity Report</h5>
+            <div class="table-responsive">
+                <table class="table table-hover table-report">
+                    <thead>
+                        <tr>
+                            <th>Electrician</th>
+                            <th>Assigned Jobs</th>
+                            <th>Total Tasks</th>
+                            <th>Completed Tasks</th>
+                            <th>Avg Progress</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in electrician_activity %}
+                        <tr>
+                            <td>{{ activity.name }}</td>
+                            <td>{{ activity.assigned_jobs or 0 }}</td>
+                            <td>{{ activity.total_tasks or 0 }}</td>
+                            <td>{{ activity.completed_tasks or 0 }}</td>
+                            <td>{{ activity.avg_progress or 0 }}%</td>
+                            <td>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: {{ (activity.completed_tasks / activity.total_tasks * 100) if activity.total_tasks > 0 else 0 }}%"></div>
+                                </div>
+                                <small>{{ ((activity.completed_tasks or 0) / (activity.total_tasks or 1) * 100)|round(1) }}% completion</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Daily Work Report -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="report-card">
+            <h5><i class="fas fa-calendar-day"></i> Daily Work Report</h5>
+            <div class="table-responsive">
+                <table class="table table-hover table-report">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Electrician</th>
+                            <th>Tasks Completed</th>
+                            <th>Hours Worked</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in daily_reports %}
+                        <tr>
+                            <td>{{ report.report_date }}</td>
+                            <td>{{ report.electrician_name }}</td>
+                            <td>{{ report.tasks_completed }}</td>
+                            <td>{{ report.hours_worked }}</td>
+                            <td>{{ report.notes or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

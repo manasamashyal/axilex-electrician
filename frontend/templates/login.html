@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .login-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .login-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        padding: 40px;
+        max-width: 450px;
+        width: 100%;
+    }
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .login-header h3 {
+        color: #1a3a47;
+        font-weight: 700;
+    }
+    .form-control {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+    }
+    .form-control:focus {
+        border-color: #0e7c9e;
+        box-shadow: 0 0 0 0.2rem rgba(14,124,158,0.25);
+    }
+    .btn-login {
+        background: linear-gradient(135deg, #0e7c9e, #1a5a6e);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        width: 100%;
+        font-weight: 600;
+        transition: transform 0.2s;
+    }
+    .btn-login:hover {
+        transform: translateY(-2px);
+        color: white;
+    }
+    .register-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+    .register-link a {
+        color: #0e7c9e;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .demo-credentials {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        font-size: 0.85rem;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-bolt fa-3x" style="color: #0e7c9e;"></i>
+            <h3>Welcome to AXILEX</h3>
+            <p class="text-muted">Electrician Management System</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            
+            <div class="register-link">
+                Don't have an account? <a href="{{ url_for('register') }}">Register here</a>
+            </div>
+        </form>
+
+        <div class="demo-credentials">
+            <strong><i class="fas fa-info-circle"></i> Demo Credentials:</strong><br>
+            <strong>Admin:</strong> admin@axilex.com / admin123<br>
+            <strong>Electrician:</strong> john@axilex.com / electrician123
+        </div>
+    </div>
+</div>
+{% endblock %}

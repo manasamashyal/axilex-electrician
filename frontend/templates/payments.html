@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .payment-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+    .wallet-card {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    .wallet-amount {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+    .btn-pay {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+    }
+    .btn-recharge {
+        background: linear-gradient(135deg, #0e7c9e, #1a5a6e);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+    }
+    .transaction-status {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+    }
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-pending { background: #fff3cd; color: #856404; }
+</style>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="page-title"><i class="fas fa-credit-card"></i> Payments & Wallet</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="wallet-card">
+            <i class="fas fa-wallet fa-2x mb-3"></i>
+            <h6>Your Wallet Balance</h6>
+            <div class="wallet-amount">₹{{ "%.2f"|format(wallet_balance) }}</div>
+            {% if user_role == 'Admin' %}
+                <button class="btn btn-light mt-3" data-bs-toggle="modal" data-bs-target="#rechargeModal">
+                    <i class="fas fa-plus"></i> Add Funds
+                </button>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="payment-card">
+            <h5><i class="fas fa-exchange-alt"></i> Send Payment</h5>
+            <div class="row">
+                <div class="col-md-5 mb-3">
+                    <label>Select Electrician</label>
+                    <select id="transfer_to" class="form-select">
+                        <option value="">Choose electrician...</option>
+                        {% for e in electricians %}
+                        <option value="{{ e.user_id }}">{{ e.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="transfer_amount" class="form-control" placeholder="Enter amount" min="1">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-pay w-100" onclick="sendPayment()">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recharge Modal -->
+<div class="modal fade" id="rechargeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Funds to Wallet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Select Amount</label>
+                    <select id="recharge_amount" class="form-select">
+                        <option value="100">₹100</option>
+                        <option value="500">₹500</option>
+                        <option value="1000">₹1000</option>
+                        <option value="5000">₹5000</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-recharge" onclick="rechargeWallet()">Add Money</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction History -->
+<div class="row">
+    <div class="col-12">
+        <div class="payment-card">
+            <h5><i class="fas fa-history"></i> Transaction History</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr><th>Date</th><th>Transaction ID</th><th>Type</th><th>From</th><th>To</th><th>Amount</th><th>Status</th>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>{{ payment.created_at[:16] }}</td>
+                            <td>{{ payment.payment_id[:12] }}...</td>
+                            <td><span class="badge bg-info">{{ payment.payment_type.replace('_', ' ').title() }}</span></td>
+                            <td>{{ payment.from_user_name or '-' }}</td>
+                            <td>{{ payment.to_user_name or '-' }}</td>
+                            <td>₹{{ "%.2f"|format(payment.amount) }}</td>
+                            <td><span class="transaction-status status-{{ payment.status }}">{{ payment.status }}</span></td>
+                        </tr>
+                        {% else %}
+                        <td><td colspan="7" class="text-center">No transactions found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function sendPayment() {
+    const toUserId = document.getElementById('transfer_to').value;
+    const amount = parseFloat(document.getElementById('transfer_amount').value);
+    
+    if(!toUserId) { alert('Please select an electrician'); return; }
+    if(isNaN(amount) || amount <= 0) { alert('Please enter valid amount'); return; }
+    if(amount > {{ wallet_balance }}) { alert('Insufficient balance'); return; }
+    
+    if(confirm(`Send ₹${amount} to selected electrician?`)) {
+        fetch('/api/wallet/transfer', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({to_user_id: toUserId, amount: amount})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) { alert('Payment sent!'); location.reload(); }
+            else { alert('Error: ' + data.error); }
+        });
+    }
+}
+
+function rechargeWallet() {
+    const amount = parseFloat(document.getElementById('recharge_amount').value);
+    fetch('/api/wallet/recharge', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({amount: amount})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) { alert('Wallet recharged!'); location.reload(); }
+        else { alert('Error: ' + data.error); }
+    });
+}
+</script>
+{% endblock %}

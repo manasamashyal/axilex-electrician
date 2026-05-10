@@ -1,0 +1,135 @@
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: #f4f7fc;
+}
+
+.sidebar {
+    background: #0b2b3b;
+    color: white;
+    min-height: 100vh;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+}
+
+.sidebar .nav-link {
+    color: #dee9f0;
+    padding: 12px 20px;
+    margin: 6px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background: #1e5a6e;
+    color: white;
+}
+
+.sidebar .nav-link i {
+    width: 28px;
+    margin-right: 10px;
+}
+
+.logo-area {
+    padding: 24px 20px;
+    border-bottom: 1px solid #2c5a6b;
+    margin-bottom: 20px;
+}
+
+.logo-area h3 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.logo-area span {
+    color: #6bc2e7;
+}
+
+.main-content {
+    background: #f4f7fc;
+    padding: 24px 30px;
+    min-height: 100vh;
+}
+
+.page-title {
+    font-weight: 700;
+    color: #1a3a47;
+    margin-bottom: 24px;
+    border-left: 5px solid #0e7c9e;
+    padding-left: 18px;
+}
+
+.card-stats {
+    border: none;
+    border-radius: 24px;
+    background: white;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.stats-icon {
+    font-size: 2.4rem;
+    color: #0e7c9e;
+    opacity: 0.7;
+}
+
+.table-custom {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+
+.table-custom th {
+    background-color: #eef2f5;
+    font-weight: 600;
+}
+
+.btn-primary-custom {
+    background: #0e7c9e;
+    border: none;
+    border-radius: 40px;
+    padding: 6px 16px;
+    font-weight: 500;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary-custom:hover {
+    background: #0a647f;
+    color: white;
+}
+
+.badge-progress {
+    background: #d9f0f5;
+    color: #0c6b8a;
+    padding: 6px 12px;
+    border-radius: 40px;
+    font-weight: 500;
+}
+
+.action-icons i {
+    margin: 0 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #6c8d9c;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+        margin-bottom: 20px;
+    }
+    .main-content {
+        padding: 20px;
+    }
+}

@@ -8,9 +8,9 @@ import uuid
 from werkzeug.utils import secure_filename
 from functools import wraps
 
-app = Flask(__name__, 
-            template_folder='../frontend/templates',
-            static_folder='../frontend/static')
+app = Flask(__name__,
+            template_folder='frontend/templates',
+            static_folder='frontend/static')
 app.secret_key = 'axilex_production_secret_key_2025'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -1029,6 +1029,118 @@ def api_mark_notification_read(id):
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
     return send_from_directory('uploads', filename)
+
+# Create database and tables on startup
+def create_tables():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    
+    # Users table
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        phone TEXT,
+        email TEXT UNIQUE NOT NULL,
+        role TEXT NOT NULL DEFAULT 'Electrician',
+        password TEXT NOT NULL,
+        wallet_balance REAL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+    
+    # Electricians table
+    c.execute('''CREATE TABLE IF NOT EXISTS electricians (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        phone TEXT,
+        email TEXT,
+        specialization TEXT,
+        status TEXT DEFAULT 'Available',
+        user_id INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id)
+    )''')
+    
+    # Jobs table
+    c.execute('''CREATE TABLE IF NOT EXISTS jobs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        location TEXT,
+        electrician_id INTEGER,
+        deadline DATE,
+        status TEXT DEFAULT 'Pending',
+        description TEXT,
+        job_image TEXT,
+        amount REAL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (electrician_id) REFERENCES electricians (id)
+    )''')
+    
+    # Tasks table
+    c.execute('''CREATE TABLE IF NOT EXISTS tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        task_name TEXT NOT NULL,
+        job_id INTEGER,
+        electrician_id INTEGER,
+        progress INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'Pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (job_id) REFERENCES jobs (id),
+        FOREIGN KEY (electrician_id) REFERENCES electricians (id)
+    )''')
+    
+    # Materials table
+    c.execute('''CREATE TABLE IF NOT EXISTS materials (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        quantity INTEGER DEFAULT 0,
+        unit TEXT,
+        usage_track TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+    
+    # Notifications table
+    c.execute('''CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        message TEXT NOT NULL,
+        type TEXT DEFAULT 'info',
+        is_read INTEGER DEFAULT 0,
+        user_id INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+    
+    # Payments table
+    c.execute('''CREATE TABLE IF NOT EXISTS payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        payment_id TEXT UNIQUE NOT NULL,
+        amount REAL NOT NULL,
+        payment_type TEXT DEFAULT 'job_payment',
+        status TEXT DEFAULT 'pending',
+        from_user_id INTEGER,
+        to_user_id INTEGER,
+        job_id INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (from_user_id) REFERENCES users (id),
+        FOREIGN KEY (to_user_id) REFERENCES users (id),
+        FOREIGN KEY (job_id) REFERENCES jobs (id)
+    )''')
+    
+    # Daily Reports table
+    c.execute('''CREATE TABLE IF NOT EXISTS daily_reports (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        report_date DATE,
+        electrician_id INTEGER,
+        tasks_completed INTEGER DEFAULT 0,
+        hours_worked INTEGER DEFAULT 0,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (electrician_id) REFERENCES electricians (id)
+    )''')
+    
+    conn.commit()
+    conn.close()
+
+# Call this function when app starts
+create_tables()
 
 if __name__ == '__main__':
     print("\n" + "=" * 60)

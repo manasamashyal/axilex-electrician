@@ -292,19 +292,17 @@
         font-weight: 500;
     }
     
-    /* Send Payment Section */
-    .send-payment-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
-        padding: 20px;
+    /* Send to Electrician Section inside Payment Options */
+    .send-electrician-section {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        background: #fafafa;
     }
     
-    .send-payment-title {
-        font-size: 16px;
+    .send-electrician-title {
+        font-size: 14px;
         font-weight: 500;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         color: #212121;
     }
 </style>
@@ -314,38 +312,32 @@
     <div class="row">
         <!-- Left Side - Payment Options -->
         <div class="col-md-8">
-            <!-- Send Payment to Electrician Section -->
-            <div class="send-payment-card">
-                <div class="send-payment-title">
-                    <i class="fas fa-exchange-alt" style="color: #2874f0;"></i> Send Payment to Electrician
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Select Electrician</label>
-                        <select id="transfer_to" class="form-select">
-                            <option value="">Choose electrician...</option>
-                            {% for e in electricians %}
-                            <option value="{{ e.user_id }}">{{ e.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Amount (₹)</label>
-                        <input type="number" id="transfer_amount" class="form-control" placeholder="Enter amount">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">&nbsp;</label>
-                        <button class="btn btn-pay w-100" onclick="openSendPaymentModal()">
-                            <i class="fas fa-paper-plane"></i> Send
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
             <!-- Payment Options -->
             <div class="payment-options-card">
                 <div class="payment-header">
                     <h4><i class="fas fa-lock" style="font-size: 14px; margin-right: 8px;"></i> SECURE PAYMENT OPTIONS</h4>
+                </div>
+                
+                <!-- Send to Electrician Section (MOVED HERE) -->
+                <div class="send-electrician-section">
+                    <div class="send-electrician-title">
+                        <i class="fas fa-exchange-alt" style="color: #2874f0;"></i> Send Payment to Electrician
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Select Electrician</label>
+                            <select id="transfer_to" class="form-select">
+                                <option value="">Choose electrician...</option>
+                                {% for e in electricians %}
+                                <option value="{{ e.user_id }}">{{ e.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Amount (₹)</label>
+                            <input type="number" id="transfer_amount" class="form-control" placeholder="Enter amount">
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- UPI Option -->
@@ -378,6 +370,11 @@
                                 <i class="fas fa-building" style="color: #e31e24;"></i>
                                 <span>BHIM</span>
                             </div>
+                        </div>
+                        <div class="alert alert-info" style="margin: 15px 0; padding: 12px; background: #e8f4f8; border-radius: 8px;">
+                            <i class="fas fa-info-circle"></i> <strong>Test Mode UPI IDs:</strong><br>
+                            • success@razorpay - Payment will succeed ✅<br>
+                            • failure@razorpay - Payment will fail ❌
                         </div>
                         <div class="form-group" style="margin-top: 15px;">
                             <label>Or enter UPI ID</label>
@@ -456,6 +453,13 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- PAY NOW BUTTON (MOVED INSIDE SECURE PAYMENT OPTIONS) -->
+                <div class="payment-option" style="border-bottom: none;">
+                    <button class="pay-button" id="payNowBtn" style="width: 100%; margin: 0;">
+                        <i class="fas fa-shield-alt"></i> SEND PAYMENT
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -466,8 +470,8 @@
                     <h4>PRICE DETAILS</h4>
                 </div>
                 <div class="price-row">
-                    <span>Recharge Amount</span>
-                    <span>₹{{ "%.2f"|format(pay_amount) }}</span>
+                    <span>Payment Amount</span>
+                    <span>₹<span id="displayAmount">0</span></span>
                 </div>
                 <div class="price-row savings">
                     <span>Delivery Charges</span>
@@ -475,14 +479,11 @@
                 </div>
                 <div class="price-row total">
                     <span>Amount Payable</span>
-                    <span>₹{{ "%.2f"|format(pay_amount) }}</span>
+                    <span>₹<span id="displayTotal">0</span></span>
                 </div>
                 <div class="offer-banner">
                     <i class="fas fa-tag"></i> Get 10% cashback on UPI payments
                 </div>
-                <button class="pay-button" id="payNowBtn">
-                    <i class="fas fa-shield-alt"></i> PAY ₹{{ "%.2f"|format(pay_amount) }}
-                </button>
                 <div class="secure-badge">
                     <i class="fas fa-lock"></i> Safe and Secure Payments<br>
                     <small>100% Authentic transactions</small>
@@ -530,7 +531,7 @@
                     <tr><td colspan="6" class="text-center">No transactions found</td></tr>
                     {% endfor %}
                 </tbody>
-            <table>
+            </table>
         </div>
     </div>
 </div>
@@ -573,28 +574,39 @@ let selectedUPIApp = null;
 let sendToUserId = null;
 let sendAmountValue = null;
 
+// Update price details when amount changes
+document.getElementById('transfer_amount').addEventListener('input', function() {
+    let amount = parseFloat(this.value) || 0;
+    document.getElementById('displayAmount').innerText = amount;
+    document.getElementById('displayTotal').innerText = amount;
+    sendAmountValue = amount;
+});
+
 // Payment option click handlers
 document.querySelectorAll('.payment-option').forEach(option => {
     const radio = option.querySelector('input[type="radio"]');
     const sectionId = option.dataset.option + '_section';
     
-    option.addEventListener('click', function(e) {
-        if (e.target.type !== 'radio') {
-            radio.checked = true;
-        }
-        selectedMethod = this.dataset.option;
-        
-        document.querySelectorAll('[id$="_section"]').forEach(section => {
-            section.style.display = 'none';
+    if (radio && sectionId) {
+        option.addEventListener('click', function(e) {
+            if (e.target.type !== 'radio') {
+                radio.checked = true;
+            }
+            selectedMethod = this.dataset.option;
+            
+            document.querySelectorAll('[id$="_section"]').forEach(section => {
+                if (section) section.style.display = 'none';
+            });
+            
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) targetSection.style.display = 'block';
+            
+            document.querySelectorAll('.payment-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            this.classList.add('active');
         });
-        
-        document.getElementById(sectionId).style.display = 'block';
-        
-        document.querySelectorAll('.payment-option').forEach(opt => {
-            opt.classList.remove('active');
-        });
-        this.classList.add('active');
-    });
+    }
 });
 
 function selectUPI(app) {
@@ -603,76 +615,35 @@ function selectUPI(app) {
 }
 
 // Card number formatting
-document.getElementById('card_number')?.addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-    e.target.value = value.substring(0, 19);
-});
+const cardNumber = document.getElementById('card_number');
+if (cardNumber) {
+    cardNumber.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+        e.target.value = value.substring(0, 19);
+    });
+}
 
-document.getElementById('expiry_date')?.addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length >= 2) {
-        value = value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
-    e.target.value = value;
-});
+const expiryDate = document.getElementById('expiry_date');
+if (expiryDate) {
+    expiryDate.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+}
 
-document.getElementById('cvv')?.addEventListener('input', function(e) {
-    e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
-});
+const cvvInput = document.getElementById('cvv');
+if (cvvInput) {
+    cvvInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+    });
+}
 
-// Pay Now button for recharge
+// Pay Now button for sending payment to electrician
 document.getElementById('payNowBtn').addEventListener('click', function() {
-    if (!selectedMethod) {
-        alert('Please select a payment method');
-        return;
-    }
-    
-    let isValid = true;
-    let errorMsg = '';
-    
-    if (selectedMethod === 'card') {
-        const cardNum = document.getElementById('card_number').value.replace(/\s/g, '');
-        const expiry = document.getElementById('expiry_date').value;
-        const cvv = document.getElementById('cvv').value;
-        const cardName = document.getElementById('card_name').value;
-        
-        if (cardNum.length < 15) {
-            errorMsg = 'Please enter valid card number';
-            isValid = false;
-        } else if (!expiry.match(/^(0[1-9]|1[0-2])\/([0-9]{2})$/)) {
-            errorMsg = 'Please enter valid expiry date (MM/YY)';
-            isValid = false;
-        } else if (cvv.length < 3) {
-            errorMsg = 'Please enter valid CVV';
-            isValid = false;
-        } else if (!cardName) {
-            errorMsg = 'Please enter card holder name';
-            isValid = false;
-        }
-    } else if (selectedMethod === 'upi') {
-        const upiId = document.getElementById('upi_id_input').value;
-        if (!upiId || !upiId.includes('@')) {
-            errorMsg = 'Please enter valid UPI ID (e.g., username@okhdfcbank)';
-            isValid = false;
-        }
-    } else if (selectedMethod === 'netbanking') {
-        const bank = document.getElementById('bank_select').value;
-        if (!bank) {
-            errorMsg = 'Please select a bank';
-            isValid = false;
-        }
-    }
-    
-    if (!isValid) {
-        alert(errorMsg);
-        return;
-    }
-    
-    showRechargeModal();
-});
-
-function openSendPaymentModal() {
     const toUserId = document.getElementById('transfer_to').value;
     const amount = parseFloat(document.getElementById('transfer_amount').value);
     const electricianName = document.getElementById('transfer_to').selectedOptions[0]?.text;
@@ -687,6 +658,59 @@ function openSendPaymentModal() {
         return;
     }
     
+    if (!selectedMethod) {
+        alert('Please select a payment method (UPI, Card, or NetBanking)');
+        return;
+    }
+    
+    // Validate based on selected method
+    let isValid = true;
+    let errorMsg = '';
+    
+    if (selectedMethod === 'card') {
+        const cardNum = document.getElementById('card_number')?.value.replace(/\s/g, '');
+        const expiry = document.getElementById('expiry_date')?.value;
+        const cvv = document.getElementById('cvv')?.value;
+        const cardName = document.getElementById('card_name')?.value;
+        
+        if (!cardNum || cardNum.length < 15) {
+            errorMsg = 'Please enter valid card number';
+            isValid = false;
+        } else if (!expiry || !expiry.match(/^(0[1-9]|1[0-2])\/([0-9]{2})$/)) {
+            errorMsg = 'Please enter valid expiry date (MM/YY)';
+            isValid = false;
+        } else if (!cvv || cvv.length < 3) {
+            errorMsg = 'Please enter valid CVV';
+            isValid = false;
+        } else if (!cardName) {
+            errorMsg = 'Please enter card holder name';
+            isValid = false;
+        }
+    } else if (selectedMethod === 'upi') {
+        const upiId = document.getElementById('upi_id_input')?.value;
+        if (!upiId || !upiId.includes('@')) {
+            errorMsg = 'Please enter valid UPI ID (e.g., username@okhdfcbank)';
+            isValid = false;
+        }
+    } else if (selectedMethod === 'netbanking') {
+        const bank = document.getElementById('bank_select')?.value;
+        if (!bank) {
+            errorMsg = 'Please select a bank';
+            isValid = false;
+        }
+    }
+    
+    if (!isValid) {
+        alert(errorMsg);
+        return;
+    }
+    
+    // Check wallet balance
+    if (amount > {{ wallet_balance }}) {
+        alert('Insufficient balance! Please recharge your wallet first.');
+        return;
+    }
+    
     sendToUserId = toUserId;
     sendAmountValue = amount;
     
@@ -694,6 +718,10 @@ function openSendPaymentModal() {
     document.getElementById('sendElectrician').innerText = electricianName;
     document.getElementById('sendPaymentModal').style.display = 'flex';
     document.getElementById('sendOtpInput').value = '';
+});
+
+function openSendPaymentModal() {
+    // This function is now handled by payNowBtn
 }
 
 function showRechargeModal() {
@@ -725,12 +753,6 @@ function verifySendPayment() {
         return;
     }
     
-    if (sendAmountValue > {{ wallet_balance }}) {
-        alert('Insufficient wallet balance! Please recharge first.');
-        closeSendModal();
-        return;
-    }
-    
     fetch('/api/wallet/transfer', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -752,8 +774,14 @@ function verifySendPayment() {
 }
 
 function verifyRechargePayment() {
-    // Create Razorpay Order
-    fetch('/create_razorpay_order', {
+    const otp = document.getElementById('rechargeOtpInput').value;
+    
+    if (otp !== '123456') {
+        alert('Invalid OTP. Please try again. (Demo OTP: 123456)');
+        return;
+    }
+    
+    fetch('/api/wallet/recharge', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({amount: payAmount})
@@ -761,47 +789,12 @@ function verifyRechargePayment() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            var options = {
-                key: data.key_id,
-                amount: data.amount,
-                currency: data.currency,
-                name: "AXILEX Electrician System",
-                description: "Wallet Recharge",
-                order_id: data.order_id,
-                handler: function(response) {
-                    fetch('/payment_success', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            order_id: response.razorpay_order_id,
-                            payment_id: response.razorpay_payment_id,
-                            amount: payAmount
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(result => {
-                        if (result.success) {
-                            alert('✅ Payment successful! ₹' + payAmount + ' added to your wallet.');
-                            location.reload();
-                        } else {
-                            alert('❌ Payment failed: ' + result.error);
-                        }
-                    });
-                },
-                prefill: {
-                    name: "{{ session.user_name }}",
-                    email: "{{ session.user_email }}"
-                },
-                theme: {
-                    color: "#0e7c9e"
-                }
-            };
-            var rzp = new Razorpay(options);
-            rzp.open();
-            closeRechargeModal();
+            alert('✅ Payment successful! ₹' + payAmount + ' added to your wallet.');
+            location.reload();
         } else {
-            alert('Error creating order: ' + data.error);
+            alert('❌ Payment failed: ' + data.error);
         }
     });
-}</script>
+}
+</script>
 {% endblock %}

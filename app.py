@@ -444,6 +444,7 @@ def payments():
                          wallet_balance=wallet_balance,
                          payments=payments,
                          electricians=electricians,
+                         pay_amount=wallet_balance,
                          user_role=session['user_role'])
 
 @app.route('/api/wallet/balance')

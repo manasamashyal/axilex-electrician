@@ -8,7 +8,6 @@
         margin: 0 auto;
     }
     
-    /* Left Side - Payment Options */
     .payment-options-card {
         background: white;
         border-radius: 8px;
@@ -84,7 +83,6 @@
         color: #878787;
     }
     
-    /* Card Form */
     .card-form {
         background: #fafafa;
         padding: 20px;
@@ -117,12 +115,6 @@
         font-size: 14px;
     }
     
-    .form-group input:focus {
-        outline: none;
-        border-color: #2874f0;
-    }
-    
-    /* UPI Apps Section */
     .upi-apps {
         display: flex;
         gap: 20px;
@@ -151,12 +143,6 @@
         margin-bottom: 5px;
     }
     
-    .upi-app span {
-        font-size: 11px;
-        color: #212121;
-    }
-    
-    /* Right Side - Price Details */
     .price-details-card {
         background: white;
         border-radius: 8px;
@@ -191,12 +177,6 @@
         margin-top: 8px;
     }
     
-    .price-row.savings {
-        color: #388e3c;
-        font-size: 12px;
-        padding-top: 0;
-    }
-    
     .offer-banner {
         background: #fff8e7;
         padding: 12px 20px;
@@ -204,11 +184,6 @@
         margin: 15px 20px;
         font-size: 12px;
         color: #212121;
-    }
-    
-    .offer-banner i {
-        color: #ff9f00;
-        margin-right: 8px;
     }
     
     .pay-button {
@@ -229,11 +204,6 @@
         background: #f90;
     }
     
-    .pay-button:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-    }
-    
     .secure-badge {
         text-align: center;
         padding: 12px 20px;
@@ -242,38 +212,6 @@
         border-top: 1px solid #f0f0f0;
     }
     
-    /* OTP Modal */
-    .otp-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-    
-    .otp-content {
-        background: white;
-        border-radius: 12px;
-        width: 380px;
-        max-width: 90%;
-        text-align: center;
-        padding: 25px;
-    }
-    
-    .otp-input {
-        font-size: 24px;
-        letter-spacing: 8px;
-        text-align: center;
-        padding: 10px;
-        margin: 20px 0;
-    }
-    
-    /* Transaction History */
     .history-card {
         background: white;
         border-radius: 8px;
@@ -286,13 +224,6 @@
         border-bottom: 1px solid #f0f0f0;
     }
     
-    .history-header h4 {
-        margin: 0;
-        font-size: 16px;
-        font-weight: 500;
-    }
-    
-    /* Send to Electrician Section inside Payment Options */
     .send-electrician-section {
         padding: 16px 20px;
         border-bottom: 1px solid #f0f0f0;
@@ -310,22 +241,20 @@
 
 <div class="container payment-container">
     <div class="row">
-        <!-- Left Side - Payment Options -->
         <div class="col-md-8">
-            <!-- Payment Options -->
             <div class="payment-options-card">
                 <div class="payment-header">
-                    <h4><i class="fas fa-lock" style="font-size: 14px; margin-right: 8px;"></i> SECURE PAYMENT OPTIONS</h4>
+                    <h4><i class="fas fa-lock"></i> SECURE PAYMENT OPTIONS</h4>
                 </div>
                 
-                <!-- Send to Electrician Section (MOVED HERE) -->
+                <!-- Send to Electrician Section -->
                 <div class="send-electrician-section">
                     <div class="send-electrician-title">
                         <i class="fas fa-exchange-alt" style="color: #2874f0;"></i> Send Payment to Electrician
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Select Electrician</label>
+                            <label>Select Electrician</label>
                             <select id="transfer_to" class="form-select">
                                 <option value="">Choose electrician...</option>
                                 {% for e in electricians %}
@@ -334,7 +263,7 @@
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Amount (₹)</label>
+                            <label>Amount (₹)</label>
                             <input type="number" id="transfer_amount" class="form-control" placeholder="Enter amount">
                         </div>
                     </div>
@@ -344,81 +273,49 @@
                 <div class="payment-option" data-option="upi">
                     <div class="option-radio">
                         <input type="radio" name="payment_method" value="upi" id="upi_radio">
-                        <div class="option-icon">
-                            <i class="fas fa-mobile-alt"></i>
-                        </div>
+                        <div class="option-icon"><i class="fas fa-mobile-alt"></i></div>
                         <div class="option-details">
-                            <div class="option-title">UPI (Unified Payments Interface)</div>
+                            <div class="option-title">UPI</div>
                             <div class="option-subtitle">Google Pay, PhonePe, Paytm, BHIM</div>
                         </div>
                     </div>
                     <div id="upi_section" style="display: none; margin-top: 15px;">
                         <div class="upi-apps">
                             <div class="upi-app" onclick="selectUPI('googlepay')">
-                                <i class="fab fa-google" style="color: #4285f4;"></i>
-                                <span>Google Pay</span>
+                                <i class="fab fa-google" style="color: #4285f4;"></i><span>Google Pay</span>
                             </div>
                             <div class="upi-app" onclick="selectUPI('phonepe')">
-                                <i class="fas fa-mobile-alt" style="color: #5f259f;"></i>
-                                <span>PhonePe</span>
+                                <i class="fas fa-mobile-alt" style="color: #5f259f;"></i><span>PhonePe</span>
                             </div>
                             <div class="upi-app" onclick="selectUPI('paytm')">
-                                <i class="fas fa-rupee-sign" style="color: #00baf2;"></i>
-                                <span>Paytm</span>
+                                <i class="fas fa-rupee-sign" style="color: #00baf2;"></i><span>Paytm</span>
                             </div>
-                            <div class="upi-app" onclick="selectUPI('bhim')">
-                                <i class="fas fa-building" style="color: #e31e24;"></i>
-                                <span>BHIM</span>
-                            </div>
-                        </div>
-                        <div class="alert alert-info" style="margin: 15px 0; padding: 12px; background: #e8f4f8; border-radius: 8px;">
-                            <i class="fas fa-info-circle"></i> <strong>Test Mode UPI IDs:</strong><br>
-                            • success@razorpay - Payment will succeed ✅<br>
-                            • failure@razorpay - Payment will fail ❌
                         </div>
                         <div class="form-group" style="margin-top: 15px;">
-                            <label>Or enter UPI ID</label>
+                            <label>UPI ID</label>
                             <input type="text" id="upi_id_input" class="form-control" placeholder="username@okhdfcbank">
                         </div>
                     </div>
                 </div>
                 
-                <!-- Credit/Debit Card Option -->
+                <!-- Card Option -->
                 <div class="payment-option" data-option="card">
                     <div class="option-radio">
                         <input type="radio" name="payment_method" value="card" id="card_radio">
-                        <div class="option-icon">
-                            <i class="fas fa-credit-card"></i>
-                        </div>
+                        <div class="option-icon"><i class="fas fa-credit-card"></i></div>
                         <div class="option-details">
-                            <div class="option-title">Credit / Debit / ATM Card</div>
-                            <div class="option-subtitle">Add and secure your card as per RBI guidelines</div>
+                            <div class="option-title">Credit/Debit Card</div>
+                            <div class="option-subtitle">Add and secure your card</div>
                         </div>
                     </div>
                     <div id="card_section" style="display: none; margin-top: 15px;">
                         <div class="card-form">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label>Card Number</label>
-                                        <input type="text" id="card_number" class="form-control" placeholder="1234 5678 9012 3456">
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="form-group"><label>Card Number</label><input type="text" id="card_number" class="form-control" placeholder="1234 5678 9012 3456"></div>
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label>Expiry Date</label>
-                                    <input type="text" id="expiry_date" class="form-control" placeholder="MM/YY">
-                                </div>
-                                <div class="form-group">
-                                    <label>CVV</label>
-                                    <input type="password" id="cvv" class="form-control" placeholder="123">
-                                </div>
+                                <div class="form-group"><label>Expiry Date</label><input type="text" id="expiry_date" class="form-control" placeholder="MM/YY"></div>
+                                <div class="form-group"><label>CVV</label><input type="password" id="cvv" class="form-control" placeholder="123"></div>
                             </div>
-                            <div class="form-group">
-                                <label>Card Holder Name</label>
-                                <input type="text" id="card_name" class="form-control" placeholder="Name on card">
-                            </div>
+                            <div class="form-group"><label>Card Holder Name</label><input type="text" id="card_name" class="form-control"></div>
                         </div>
                     </div>
                 </div>
@@ -427,35 +324,25 @@
                 <div class="payment-option" data-option="netbanking">
                     <div class="option-radio">
                         <input type="radio" name="payment_method" value="netbanking" id="netbanking_radio">
-                        <div class="option-icon">
-                            <i class="fas fa-university"></i>
-                        </div>
+                        <div class="option-icon"><i class="fas fa-university"></i></div>
                         <div class="option-details">
                             <div class="option-title">Net Banking</div>
                             <div class="option-subtitle">All major banks</div>
                         </div>
                     </div>
                     <div id="netbanking_section" style="display: none; margin-top: 15px;">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Popular Banks</label>
-                                    <select id="bank_select" class="form-control">
-                                        <option value="">Select Bank</option>
-                                        <option value="HDFC">HDFC Bank</option>
-                                        <option value="ICICI">ICICI Bank</option>
-                                        <option value="SBI">State Bank of India</option>
-                                        <option value="Axis">Axis Bank</option>
-                                        <option value="Kotak">Kotak Mahindra Bank</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                        <select id="bank_select" class="form-control">
+                            <option value="">Select Bank</option>
+                            <option value="HDFC">HDFC Bank</option>
+                            <option value="ICICI">ICICI Bank</option>
+                            <option value="SBI">SBI</option>
+                            <option value="Axis">Axis Bank</option>
+                        </select>
                     </div>
                 </div>
                 
-                <!-- PAY NOW BUTTON (MOVED INSIDE SECURE PAYMENT OPTIONS) -->
-                <div class="payment-option" style="border-bottom: none;">
+                <!-- SEND PAYMENT BUTTON -->
+                <div style="padding: 20px;">
                     <button class="pay-button" id="payNowBtn" style="width: 100%; margin: 0;">
                         <i class="fas fa-shield-alt"></i> SEND PAYMENT
                     </button>
@@ -466,69 +353,31 @@
         <!-- Right Side - Price Details -->
         <div class="col-md-4">
             <div class="price-details-card">
-                <div class="price-header">
-                    <h4>PRICE DETAILS</h4>
-                </div>
-                <div class="price-row">
-                    <span>Payment Amount</span>
-                    <span>₹<span id="displayAmount">0</span></span>
-                </div>
-                <div class="price-row savings">
-                    <span>Delivery Charges</span>
-                    <span class="text-success">FREE</span>
-                </div>
-                <div class="price-row total">
-                    <span>Amount Payable</span>
-                    <span>₹<span id="displayTotal">0</span></span>
-                </div>
-                <div class="offer-banner">
-                    <i class="fas fa-tag"></i> Get 10% cashback on UPI payments
-                </div>
-                <div class="secure-badge">
-                    <i class="fas fa-lock"></i> Safe and Secure Payments<br>
-                    <small>100% Authentic transactions</small>
-                </div>
+                <div class="price-header"><h4>PRICE DETAILS</h4></div>
+                <div class="price-row"><span>Payment Amount</span><span>₹<span id="displayAmount">0</span></span></div>
+                <div class="price-row total"><span>Amount Payable</span><span>₹<span id="displayTotal">0</span></span></div>
+                <div class="offer-banner"><i class="fas fa-tag"></i> 10% cashback on UPI</div>
+                <div class="secure-badge"><i class="fas fa-lock"></i> Safe & Secure Payments</div>
             </div>
         </div>
     </div>
     
     <!-- Transaction History -->
     <div class="history-card">
-        <div class="history-header">
-            <h4><i class="fas fa-history"></i> TRANSACTION HISTORY</h4>
-        </div>
+        <div class="history-header"><h4><i class="fas fa-history"></i> TRANSACTION HISTORY</h4></div>
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Transaction ID</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
+            <table class="table">
+                <thead><tr><th>Date</th><th>Transaction ID</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead>
                 <tbody>
                     {% for payment in payments %}
                     <tr>
                         <td>{{ payment.created_at[:16] }}</td>
                         <td>{{ payment.payment_id[:12] }}...</td>
-                        <td>
-                            {% if payment.payment_type == 'wallet_recharge' %}
-                                <span class="badge bg-success">Recharge</span>
-                            {% elif payment.payment_type == 'wallet_transfer' %}
-                                <span class="badge bg-primary">Transfer</span>
-                            {% else %}
-                                <span class="badge bg-info">Job Payment</span>
-                            {% endif %}
-                        </td>
+                        <td><span class="badge bg-success">{{ payment.payment_type.replace('_', ' ').title() }}</span></td>
                         <td>{{ payment.from_user_name }} → {{ payment.to_user_name }}</td>
                         <td>₹{{ "%.2f"|format(payment.amount) }}</td>
                         <td><span class="badge bg-success">Success</span></td>
                     </tr>
-                    {% else %}
-                    <tr><td colspan="6" class="text-center">No transactions found</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -536,265 +385,108 @@
     </div>
 </div>
 
-<!-- Send Payment Modal -->
-<div id="sendPaymentModal" class="otp-modal">
-    <div class="otp-content">
-        <i class="fas fa-exchange-alt" style="font-size: 48px; color: #ff9f00;"></i>
-        <h5 style="margin: 15px 0;">Confirm Payment</h5>
-        <p>You are sending ₹<span id="sendAmount"></span> to <span id="sendElectrician"></span></p>
-        <p>OTP sent to your registered mobile number</p>
-        <input type="text" id="sendOtpInput" class="form-control otp-input" placeholder="------" maxlength="6">
-        <div style="margin: 15px 0;">
-            <button class="btn btn-outline-secondary btn-sm" onclick="resendSendOTP()">Resend OTP</button>
-        </div>
-        <button class="pay-button" style="width: 100%; margin: 0 0 10px 0;" onclick="verifySendPayment()">VERIFY & SEND</button>
-        <button class="btn btn-link" onclick="closeSendModal()">Cancel</button>
-    </div>
-</div>
-
-<!-- Recharge OTP Modal -->
-<div id="rechargeOtpModal" class="otp-modal">
-    <div class="otp-content">
-        <i class="fas fa-shield-alt" style="font-size: 48px; color: #ff9f00;"></i>
-        <h5 style="margin: 15px 0;">Verify Payment</h5>
-        <p>OTP sent to <strong>{{ session.user_email }}</strong></p>
-        <input type="text" id="rechargeOtpInput" class="form-control otp-input" placeholder="------" maxlength="6">
-        <div style="margin: 15px 0;">
-            <button class="btn btn-outline-secondary btn-sm" onclick="resendRechargeOTP()">Resend OTP</button>
-        </div>
-        <button class="pay-button" style="width: 100%; margin: 0 0 10px 0;" onclick="verifyRechargePayment()">VERIFY & PAY</button>
-        <button class="btn btn-link" onclick="closeRechargeModal()">Cancel</button>
-    </div>
-</div>
-
 <script>
 let selectedMethod = null;
-let payAmount = {{ pay_amount }};
-let selectedUPIApp = null;
-let sendToUserId = null;
-let sendAmountValue = null;
 
-// Update price details when amount changes
+// Update price display
 document.getElementById('transfer_amount').addEventListener('input', function() {
-    let amount = parseFloat(this.value) || 0;
-    document.getElementById('displayAmount').innerText = amount;
-    document.getElementById('displayTotal').innerText = amount;
-    sendAmountValue = amount;
+    let val = parseFloat(this.value) || 0;
+    document.getElementById('displayAmount').innerText = val;
+    document.getElementById('displayTotal').innerText = val;
 });
 
-// Payment option click handlers
-document.querySelectorAll('.payment-option').forEach(option => {
-    const radio = option.querySelector('input[type="radio"]');
-    const sectionId = option.dataset.option + '_section';
-    
-    if (radio && sectionId) {
-        option.addEventListener('click', function(e) {
-            if (e.target.type !== 'radio') {
-                radio.checked = true;
-            }
-            selectedMethod = this.dataset.option;
-            
-            document.querySelectorAll('[id$="_section"]').forEach(section => {
-                if (section) section.style.display = 'none';
-            });
-            
-            const targetSection = document.getElementById(sectionId);
-            if (targetSection) targetSection.style.display = 'block';
-            
-            document.querySelectorAll('.payment-option').forEach(opt => {
-                opt.classList.remove('active');
-            });
-            this.classList.add('active');
-        });
-    }
+// Payment option clicks
+document.querySelectorAll('.payment-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        let method = this.dataset.option;
+        selectedMethod = method;
+        document.querySelectorAll('[id$="_section"]').forEach(s => s.style.display = 'none');
+        document.getElementById(method + '_section').style.display = 'block';
+        document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(method + '_radio').checked = true;
+    });
 });
 
 function selectUPI(app) {
-    selectedUPIApp = app;
     document.getElementById('upi_id_input').value = app + '@okhdfcbank';
 }
 
-// Card number formatting
-const cardNumber = document.getElementById('card_number');
-if (cardNumber) {
-    cardNumber.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-        e.target.value = value.substring(0, 19);
-    });
-}
-
-const expiryDate = document.getElementById('expiry_date');
-if (expiryDate) {
-    expiryDate.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length >= 2) {
-            value = value.substring(0, 2) + '/' + value.substring(2, 4);
-        }
-        e.target.value = value;
-    });
-}
-
-const cvvInput = document.getElementById('cvv');
-if (cvvInput) {
-    cvvInput.addEventListener('input', function(e) {
-        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
-    });
-}
-
-// Pay Now button for sending payment to electrician
+// SEND PAYMENT - REAL RAZORPAY
 document.getElementById('payNowBtn').addEventListener('click', function() {
     const toUserId = document.getElementById('transfer_to').value;
     const amount = parseFloat(document.getElementById('transfer_amount').value);
     const electricianName = document.getElementById('transfer_to').selectedOptions[0]?.text;
     
-    if (!toUserId) {
-        alert('Please select an electrician');
-        return;
-    }
+    if (!toUserId) { alert('Select electrician'); return; }
+    if (!amount || amount <= 0) { alert('Enter amount'); return; }
+    if (!selectedMethod) { alert('Select payment method'); return; }
     
-    if (isNaN(amount) || amount <= 0) {
-        alert('Please enter valid amount');
-        return;
-    }
-    
-    if (!selectedMethod) {
-        alert('Please select a payment method (UPI, Card, or NetBanking)');
-        return;
-    }
-    
-    // Validate based on selected method
-    let isValid = true;
-    let errorMsg = '';
-    
+    // Validate card if selected
     if (selectedMethod === 'card') {
         const cardNum = document.getElementById('card_number')?.value.replace(/\s/g, '');
-        const expiry = document.getElementById('expiry_date')?.value;
-        const cvv = document.getElementById('cvv')?.value;
-        const cardName = document.getElementById('card_name')?.value;
-        
-        if (!cardNum || cardNum.length < 15) {
-            errorMsg = 'Please enter valid card number';
-            isValid = false;
-        } else if (!expiry || !expiry.match(/^(0[1-9]|1[0-2])\/([0-9]{2})$/)) {
-            errorMsg = 'Please enter valid expiry date (MM/YY)';
-            isValid = false;
-        } else if (!cvv || cvv.length < 3) {
-            errorMsg = 'Please enter valid CVV';
-            isValid = false;
-        } else if (!cardName) {
-            errorMsg = 'Please enter card holder name';
-            isValid = false;
-        }
+        if (!cardNum || cardNum.length < 15) { alert('Enter valid card number'); return; }
     } else if (selectedMethod === 'upi') {
         const upiId = document.getElementById('upi_id_input')?.value;
-        if (!upiId || !upiId.includes('@')) {
-            errorMsg = 'Please enter valid UPI ID (e.g., username@okhdfcbank)';
-            isValid = false;
-        }
+        if (!upiId || !upiId.includes('@')) { alert('Enter valid UPI ID'); return; }
     } else if (selectedMethod === 'netbanking') {
         const bank = document.getElementById('bank_select')?.value;
-        if (!bank) {
-            errorMsg = 'Please select a bank';
-            isValid = false;
-        }
+        if (!bank) { alert('Select bank'); return; }
     }
     
-    if (!isValid) {
-        alert(errorMsg);
-        return;
-    }
+    if (amount > {{ wallet_balance }}) { alert('Insufficient balance!'); return; }
     
-    // Check wallet balance
-    if (amount > {{ wallet_balance }}) {
-        alert('Insufficient balance! Please recharge your wallet first.');
-        return;
-    }
-    
-    sendToUserId = toUserId;
-    sendAmountValue = amount;
-    
-    document.getElementById('sendAmount').innerText = amount;
-    document.getElementById('sendElectrician').innerText = electricianName;
-    document.getElementById('sendPaymentModal').style.display = 'flex';
-    document.getElementById('sendOtpInput').value = '';
+    // Process payment
+    fetch('/create_razorpay_order', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({amount: amount})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            var options = {
+                key: data.key_id,
+                amount: data.amount,
+                currency: data.currency,
+                name: "AXILEX Payment",
+                description: "Sending ₹" + amount + " to " + electricianName,
+                order_id: data.order_id,
+                handler: function(response) {
+                    fetch('/api/wallet/transfer', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({to_user_id: toUserId, amount: amount, job_id: null})
+                    })
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert('✅ ₹' + amount + ' sent to ' + electricianName);
+                            location.reload();
+                        } else { alert('Transfer failed: ' + result.error); }
+                    });
+                },
+                prefill: { name: "{{ session.user_name }}", email: "{{ session.user_email }}", contact: "9999999999" },
+                theme: { color: "#0e7c9e" }
+            };
+            new Razorpay(options).open();
+        } else { alert('Error: ' + data.error); }
+    });
 });
 
-function openSendPaymentModal() {
-    // This function is now handled by payNowBtn
-}
-
-function showRechargeModal() {
-    document.getElementById('rechargeOtpModal').style.display = 'flex';
-    document.getElementById('rechargeOtpInput').value = '';
-}
-
-function closeSendModal() {
-    document.getElementById('sendPaymentModal').style.display = 'none';
-}
-
-function closeRechargeModal() {
-    document.getElementById('rechargeOtpModal').style.display = 'none';
-}
-
-function resendSendOTP() {
-    alert('OTP resent to your registered mobile number');
-}
-
-function resendRechargeOTP() {
-    alert('OTP resent to your registered mobile number');
-}
-
-function verifySendPayment() {
-    const otp = document.getElementById('sendOtpInput').value;
-    
-    if (otp !== '123456') {
-        alert('Invalid OTP. Please try again. (Demo OTP: 123456)');
-        return;
-    }
-    
-    fetch('/api/wallet/transfer', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            to_user_id: sendToUserId,
-            amount: sendAmountValue,
-            job_id: null
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ Payment successful! ₹' + sendAmountValue + ' sent to electrician.');
-            location.reload();
-        } else {
-            alert('❌ Payment failed: ' + data.error);
-        }
-    });
-}
-
-function verifyRechargePayment() {
-    const otp = document.getElementById('rechargeOtpInput').value;
-    
-    if (otp !== '123456') {
-        alert('Invalid OTP. Please try again. (Demo OTP: 123456)');
-        return;
-    }
-    
-    fetch('/api/wallet/recharge', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({amount: payAmount})
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ Payment successful! ₹' + payAmount + ' added to your wallet.');
-            location.reload();
-        } else {
-            alert('❌ Payment failed: ' + data.error);
-        }
-    });
-}
+// Formatting
+document.getElementById('card_number')?.addEventListener('input', function(e) {
+    let val = e.target.value.replace(/\D/g, '');
+    val = val.replace(/(\d{4})(?=\d)/g, '$1 ');
+    e.target.value = val.substring(0, 19);
+});
+document.getElementById('expiry_date')?.addEventListener('input', function(e) {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length >= 2) val = val.substring(0,2) + '/' + val.substring(2,4);
+    e.target.value = val;
+});
+document.getElementById('cvv')?.addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '').substring(0,3);
+});
 </script>
 {% endblock %}

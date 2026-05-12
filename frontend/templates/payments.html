@@ -2,7 +2,6 @@
 
 {% block content %}
 <style>
-    /* Flipkart Style Payment Page */
     .payment-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -224,47 +223,79 @@
         border-bottom: 1px solid #f0f0f0;
     }
     
-    .send-electrician-section {
-        padding: 16px 20px;
-        border-bottom: 1px solid #f0f0f0;
-        background: #fafafa;
+    /* Electrician View Styles */
+    .electrician-view-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        padding: 25px;
+        text-align: center;
     }
     
-    .send-electrician-title {
-        font-size: 14px;
-        font-weight: 500;
-        margin-bottom: 12px;
-        color: #212121;
+    .electrician-balance {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #2874f0;
+        margin: 15px 0;
+    }
+    
+    .readonly-badge {
+        background: #e8f4f8;
+        color: #0e7c9e;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        margin-bottom: 15px;
+        display: inline-block;
+    }
+    
+    .info-msg {
+        background: #e8f4f8;
+        border-left: 4px solid #0e7c9e;
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-size: 13px;
+        color: #333;
     }
 </style>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <div class="container payment-container">
     <div class="row">
         <div class="col-md-8">
+            
+            {% if user_role == 'Admin' %}
+            <!-- ==================== ADMIN VIEW - Full Payment Options ==================== -->
             <div class="payment-options-card">
                 <div class="payment-header">
                     <h4><i class="fas fa-lock"></i> SECURE PAYMENT OPTIONS</h4>
                 </div>
                 
                 <!-- Send to Electrician Section -->
-                <div class="send-electrician-section">
-                    <div class="send-electrician-title">
-                        <i class="fas fa-exchange-alt" style="color: #2874f0;"></i> Send Payment to Electrician
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label>Select Electrician</label>
-                            <select id="transfer_to" class="form-select">
-                                <option value="">Choose electrician...</option>
-                                {% for e in electricians %}
-                                <option value="{{ e.user_id }}">{{ e.name }}</option>
-                                {% endfor %}
-                            </select>
+                <div class="payment-option" style="border-bottom: 1px solid #f0f0f0;">
+                    <div class="option-radio">
+                        <div class="option-icon"><i class="fas fa-exchange-alt" style="color: #2874f0;"></i></div>
+                        <div class="option-details">
+                            <div class="option-title">Send Payment to Electrician</div>
+                            <div class="option-subtitle">Select electrician and enter amount</div>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label>Amount (₹)</label>
-                            <input type="number" id="transfer_amount" class="form-control" placeholder="Enter amount">
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Select Electrician</label>
+                                <select id="transfer_to" class="form-select">
+                                    <option value="">Choose electrician...</option>
+                                    {% for e in electricians %}
+                                    <option value="{{ e.user_id }}">{{ e.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Amount (₹)</label>
+                                <input type="number" id="transfer_amount" class="form-control" placeholder="Enter amount">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -276,19 +307,19 @@
                         <div class="option-icon"><i class="fas fa-mobile-alt"></i></div>
                         <div class="option-details">
                             <div class="option-title">UPI</div>
-                            <div class="option-subtitle">Google Pay, PhonePe, Paytm, BHIM</div>
+                            <div class="option-subtitle">Google Pay, PhonePe, Paytm</div>
                         </div>
                     </div>
                     <div id="upi_section" style="display: none; margin-top: 15px;">
                         <div class="upi-apps">
                             <div class="upi-app" onclick="selectUPI('googlepay')">
-                                <i class="fab fa-google" style="color: #4285f4;"></i><span>Google Pay</span>
+                                <i class="fab fa-google"></i><span>Google Pay</span>
                             </div>
                             <div class="upi-app" onclick="selectUPI('phonepe')">
-                                <i class="fas fa-mobile-alt" style="color: #5f259f;"></i><span>PhonePe</span>
+                                <i class="fas fa-mobile-alt"></i><span>PhonePe</span>
                             </div>
                             <div class="upi-app" onclick="selectUPI('paytm')">
-                                <i class="fas fa-rupee-sign" style="color: #00baf2;"></i><span>Paytm</span>
+                                <i class="fas fa-rupee-sign"></i><span>Paytm</span>
                             </div>
                         </div>
                         <div class="form-group" style="margin-top: 15px;">
@@ -341,17 +372,39 @@
                     </div>
                 </div>
                 
-                <!-- SEND PAYMENT BUTTON -->
+                <!-- SEND BUTTON -->
                 <div style="padding: 20px;">
                     <button class="pay-button" id="payNowBtn" style="width: 100%; margin: 0;">
                         <i class="fas fa-shield-alt"></i> SEND PAYMENT
                     </button>
                 </div>
             </div>
+            
+            {% else %}
+            <!-- ==================== ELECTRICIAN VIEW - READ ONLY ==================== -->
+            <div class="electrician-view-card">
+                <div class="text-center mb-3">
+                    <span class="readonly-badge">
+                        <i class="fas fa-eye"></i> Read-Only Access
+                    </span>
+                </div>
+                <i class="fas fa-wallet" style="font-size: 48px; color: #2874f0;"></i>
+                <h4 style="margin-top: 15px;">Your Wallet Balance</h4>
+                <div class="electrician-balance">₹{{ "%.2f"|format(wallet_balance) }}</div>
+                <div class="info-msg">
+                    <i class="fas fa-info-circle" style="color: #0e7c9e;"></i> 
+                    <strong>Information:</strong><br>
+                    You have read-only access to the payment section.<br>
+                    Only administrators can send payments.<br>
+                    Contact your admin for payment requests.
+                </div>
+            </div>
+            {% endif %}
         </div>
         
-        <!-- Right Side - Price Details -->
+        <!-- Right Side - Price Details (Only for Admin) -->
         <div class="col-md-4">
+            {% if user_role == 'Admin' %}
             <div class="price-details-card">
                 <div class="price-header"><h4>PRICE DETAILS</h4></div>
                 <div class="price-row"><span>Payment Amount</span><span>₹<span id="displayAmount">0</span></span></div>
@@ -359,24 +412,48 @@
                 <div class="offer-banner"><i class="fas fa-tag"></i> 10% cashback on UPI</div>
                 <div class="secure-badge"><i class="fas fa-lock"></i> Safe & Secure Payments</div>
             </div>
+            {% endif %}
         </div>
     </div>
     
-    <!-- Transaction History -->
+    <!-- Transaction History (Visible to Both Roles) -->
     <div class="history-card">
-        <div class="history-header"><h4><i class="fas fa-history"></i> TRANSACTION HISTORY</h4></div>
+        <div class="history-header">
+            <h4><i class="fas fa-history"></i> TRANSACTION HISTORY</h4>
+        </div>
         <div class="table-responsive">
-            <table class="table">
-                <thead><tr><th>Date</th><th>Transaction ID</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead>
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Transaction ID</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {% for payment in payments %}
                     <tr>
                         <td>{{ payment.created_at[:16] }}</td>
                         <td>{{ payment.payment_id[:12] }}...</td>
-                        <td><span class="badge bg-success">{{ payment.payment_type.replace('_', ' ').title() }}</span></td>
+                        <td>
+                            {% if payment.payment_type == 'wallet_recharge' %}
+                                <span class="badge bg-success">Recharge</span>
+                            {% elif payment.payment_type == 'wallet_transfer' %}
+                                <span class="badge bg-primary">Transfer</span>
+                            {% else %}
+                                <span class="badge bg-info">Job Payment</span>
+                            {% endif %}
+                        </td>
                         <td>{{ payment.from_user_name }} → {{ payment.to_user_name }}</td>
                         <td>₹{{ "%.2f"|format(payment.amount) }}</td>
                         <td><span class="badge bg-success">Success</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No transactions found</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -386,33 +463,51 @@
 </div>
 
 <script>
+{% if user_role == 'Admin' %}
+// ==================== ADMIN SCRIPT ====================
 let selectedMethod = null;
 
-// Update price display
 document.getElementById('transfer_amount').addEventListener('input', function() {
     let val = parseFloat(this.value) || 0;
     document.getElementById('displayAmount').innerText = val;
     document.getElementById('displayTotal').innerText = val;
 });
 
-// Payment option clicks
 document.querySelectorAll('.payment-option').forEach(opt => {
-    opt.addEventListener('click', function() {
-        let method = this.dataset.option;
-        selectedMethod = method;
-        document.querySelectorAll('[id$="_section"]').forEach(s => s.style.display = 'none');
-        document.getElementById(method + '_section').style.display = 'block';
-        document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById(method + '_radio').checked = true;
-    });
+    const radio = opt.querySelector('input[type="radio"]');
+    const sectionId = opt.dataset.option + '_section';
+    if (radio && sectionId) {
+        opt.addEventListener('click', function() {
+            radio.checked = true;
+            selectedMethod = this.dataset.option;
+            document.querySelectorAll('[id$="_section"]').forEach(s => s.style.display = 'none');
+            document.getElementById(sectionId).style.display = 'block';
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+        });
+    }
 });
 
 function selectUPI(app) {
     document.getElementById('upi_id_input').value = app + '@okhdfcbank';
 }
 
-// SEND PAYMENT - REAL RAZORPAY
+document.getElementById('card_number')?.addEventListener('input', function(e) {
+    let val = e.target.value.replace(/\D/g, '');
+    val = val.replace(/(\d{4})(?=\d)/g, '$1 ');
+    e.target.value = val.substring(0, 19);
+});
+
+document.getElementById('expiry_date')?.addEventListener('input', function(e) {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length >= 2) val = val.substring(0,2) + '/' + val.substring(2,4);
+    e.target.value = val;
+});
+
+document.getElementById('cvv')?.addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '').substring(0,3);
+});
+
 document.getElementById('payNowBtn').addEventListener('click', function() {
     const toUserId = document.getElementById('transfer_to').value;
     const amount = parseFloat(document.getElementById('transfer_amount').value);
@@ -422,7 +517,6 @@ document.getElementById('payNowBtn').addEventListener('click', function() {
     if (!amount || amount <= 0) { alert('Enter amount'); return; }
     if (!selectedMethod) { alert('Select payment method'); return; }
     
-    // Validate card if selected
     if (selectedMethod === 'card') {
         const cardNum = document.getElementById('card_number')?.value.replace(/\s/g, '');
         if (!cardNum || cardNum.length < 15) { alert('Enter valid card number'); return; }
@@ -436,7 +530,6 @@ document.getElementById('payNowBtn').addEventListener('click', function() {
     
     if (amount > {{ wallet_balance }}) { alert('Insufficient balance!'); return; }
     
-    // Process payment
     fetch('/create_razorpay_order', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -473,20 +566,6 @@ document.getElementById('payNowBtn').addEventListener('click', function() {
         } else { alert('Error: ' + data.error); }
     });
 });
-
-// Formatting
-document.getElementById('card_number')?.addEventListener('input', function(e) {
-    let val = e.target.value.replace(/\D/g, '');
-    val = val.replace(/(\d{4})(?=\d)/g, '$1 ');
-    e.target.value = val.substring(0, 19);
-});
-document.getElementById('expiry_date')?.addEventListener('input', function(e) {
-    let val = e.target.value.replace(/\D/g, '');
-    if (val.length >= 2) val = val.substring(0,2) + '/' + val.substring(2,4);
-    e.target.value = val;
-});
-document.getElementById('cvv')?.addEventListener('input', function(e) {
-    e.target.value = e.target.value.replace(/\D/g, '').substring(0,3);
-});
+{% endif %}
 </script>
 {% endblock %}

@@ -35,11 +35,14 @@
         border: 1px solid #ddd;
         padding: 10px 15px;
     }
-    .job-image-preview {
-        max-width: 50px;
-        max-height: 50px;
-        border-radius: 5px;
-        cursor: pointer;
+    .readonly-badge {
+        background: #e8f4f8;
+        color: #0e7c9e;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        margin-bottom: 15px;
+        display: inline-block;
     }
 </style>
 
@@ -48,6 +51,15 @@
         <h2 class="page-title"><i class="fas fa-briefcase"></i> Job Management</h2>
     </div>
 </div>
+
+<!-- Role Badge for Electrician -->
+{% if user_role == 'Electrician' %}
+<div class="text-center mb-3">
+    <span class="readonly-badge">
+        <i class="fas fa-eye"></i> Read-Only Mode - You can only view your assigned jobs
+    </span>
+</div>
+{% endif %}
 
 <!-- Search Section -->
 <div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
@@ -66,7 +78,7 @@
     </div>
 </div>
 
-<!-- Add Job Button -->
+<!-- Add Job Button - Only for Admin -->
 <div class="row mb-3">
     <div class="col-12 text-end">
         {% if user_role == 'Admin' %}
@@ -85,12 +97,12 @@
                 <thead style="background: #f8f9fa;">
                     <tr>
                         <th style="padding: 15px;">#</th>
-                        <th style="padding: 15px;">Image</th>
                         <th style="padding: 15px;">Job Title</th>
                         <th style="padding: 15px;">Location</th>
                         <th style="padding: 15px;">Electrician</th>
                         <th style="padding: 15px;">Deadline</th>
                         <th style="padding: 15px;">Status</th>
+                        <th style="padding: 15px;">Amount</th>
                         {% if user_role == 'Admin' %}
                         <th style="padding: 15px;">Actions</th>
                         {% endif %}
@@ -100,13 +112,6 @@
                     {% for job in jobs %}
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>
-                            {% if job.job_image %}
-                                <img src="/uploads/job_images/{{ job.job_image }}" class="job-image-preview" alt="Job Image" onclick="window.open(this.src)">
-                            {% else %}
-                                <i class="fas fa-image text-muted"></i>
-                            {% endif %}
-                        </td>
                         <td>
                             <strong>{{ job.title }}</strong><br>
                             <small class="text-muted">{{ job.description[:40] if job.description else '' }}{% if job.description and job.description|length > 40 %}...{% endif %}</small>
@@ -122,6 +127,8 @@
                         <td>
                             <i class="far fa-calendar-alt"></i> {{ job.deadline or 'N/A' }}
                         </td>
+                        
+                        <!-- Status Column - Role Based -->
                         <td>
                             {% if user_role == 'Admin' %}
                             <select class="form-select form-select-sm" onchange="updateJobStatus({{ job.id }}, this.value)" 
@@ -136,6 +143,16 @@
                             </span>
                             {% endif %}
                         </td>
+                        
+                        <td>
+                            {% if job.amount and job.amount > 0 %}
+                                <span class="badge bg-success">₹{{ "%.2f"|format(job.amount) }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">N/A</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Actions Column - Only for Admin -->
                         {% if user_role == 'Admin' %}
                         <td>
                             <button class="btn-edit" onclick="editJob({{ job.id }})">
@@ -149,7 +166,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8" class="text-center py-4">
+                        <td colspan="{% if user_role == 'Admin' %}8{% else %}7{% endif %}" class="text-center py-4">
                             <i class="fas fa-briefcase fa-3x text-muted mb-2 d-block"></i>
                             No jobs found. Click "Create New Job" to get started.
                         </td>
@@ -161,7 +178,8 @@
     </div>
 </div>
 
-<!-- Add Job Modal WITH FILE UPLOAD -->
+<!-- Add Job Modal - Only for Admin -->
+{% if user_role == 'Admin' %}
 <div class="modal fade" id="addJobModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content" style="border-radius: 15px;">
@@ -174,11 +192,11 @@
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label class="form-label">Job Title *</label>
-                            <input type="text" id="job_title" name="title" class="form-control" placeholder="Enter job title" required>
+                            <input type="text" id="job_title" name="title" class="form-control" required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Location</label>
-                            <input type="text" id="job_location" name="location" class="form-control" placeholder="Job location">
+                            <input type="text" id="job_location" name="location" class="form-control">
                         </div>
                     </div>
                     <div class="row">
@@ -196,14 +214,19 @@
                             <input type="date" id="job_deadline" name="deadline" class="form-control">
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Job Description</label>
-                        <textarea id="job_description" name="description" class="form-control" rows="3" placeholder="Enter job details..."></textarea>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Amount (₹)</label>
+                            <input type="number" id="job_amount" name="amount" class="form-control" placeholder="Enter job amount" step="100">
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><i class="fas fa-image"></i> Upload Job Image (Optional)</label>
+                        <label class="form-label">Job Description</label>
+                        <textarea id="job_description" name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-image"></i> Upload Job Image</label>
                         <input type="file" id="job_image" name="job_image" class="form-control" accept="image/*">
-                        <small class="text-muted">Supported formats: JPG, PNG, GIF (Max 16MB)</small>
                     </div>
                 </form>
             </div>
@@ -253,6 +276,10 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Amount (₹)</label>
+                            <input type="number" id="edit_amount" class="form-control" step="100">
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Status</label>
                             <select id="edit_status" class="form-select">
                                 <option value="Pending">⏳ Pending</option>
@@ -274,6 +301,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <script>
 function searchJobs() {
@@ -281,7 +309,7 @@ function searchJobs() {
     window.location.href = `/jobs?search=${encodeURIComponent(search)}`;
 }
 
-// Function for adding job with image upload
+{% if user_role == 'Admin' %}
 function addJobWithImage() {
     const formData = new FormData();
     formData.append('title', document.getElementById('job_title').value);
@@ -289,6 +317,7 @@ function addJobWithImage() {
     formData.append('electrician_id', document.getElementById('job_electrician').value);
     formData.append('deadline', document.getElementById('job_deadline').value);
     formData.append('description', document.getElementById('job_description').value);
+    formData.append('amount', document.getElementById('job_amount').value);
     
     const fileInput = document.getElementById('job_image');
     if(fileInput.files.length > 0) {
@@ -325,6 +354,7 @@ function editJob(id) {
         document.getElementById('edit_deadline').value = data.deadline || '';
         document.getElementById('edit_status').value = data.status;
         document.getElementById('edit_description').value = data.description || '';
+        document.getElementById('edit_amount').value = data.amount || '';
         
         new bootstrap.Modal(document.getElementById('editJobModal')).show();
     });
@@ -337,7 +367,8 @@ function updateJob() {
         electrician_id: document.getElementById('edit_electrician').value || null,
         deadline: document.getElementById('edit_deadline').value,
         status: document.getElementById('edit_status').value,
-        description: document.getElementById('edit_description').value
+        description: document.getElementById('edit_description').value,
+        amount: document.getElementById('edit_amount').value
     };
     const id = document.getElementById('edit_job_id').value;
     
@@ -352,22 +383,6 @@ function updateJob() {
             location.reload();
         } else {
             alert('Error: ' + data.error);
-        }
-    });
-}
-
-function updateJobStatus(id, status) {
-    fetch(`/update_job_status/${id}`, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({status: status})
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success) {
-            location.reload();
-        } else {
-            alert('Error updating status');
         }
     });
 }
@@ -387,6 +402,23 @@ function deleteJob(id) {
             }
         });
     }
+}
+{% endif %}
+
+function updateJobStatus(id, status) {
+    fetch(`/update_job_status/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({status: status})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            location.reload();
+        } else {
+            alert('Error updating status');
+        }
+    });
 }
 
 // Allow Enter key to search

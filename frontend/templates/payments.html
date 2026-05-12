@@ -308,6 +308,7 @@
         color: #212121;
     }
 </style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <div class="container payment-container">
     <div class="row">
@@ -751,14 +752,8 @@ function verifySendPayment() {
 }
 
 function verifyRechargePayment() {
-    const otp = document.getElementById('rechargeOtpInput').value;
-    
-    if (otp !== '123456') {
-        alert('Invalid OTP. Please try again. (Demo OTP: 123456)');
-        return;
-    }
-    
-    fetch('/api/wallet/recharge', {
+    // Create Razorpay Order
+    fetch('/create_razorpay_order', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({amount: payAmount})
@@ -766,12 +761,47 @@ function verifyRechargePayment() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('✅ Payment successful! ₹' + payAmount + ' added to your wallet.');
-            location.reload();
+            var options = {
+                key: data.key_id,
+                amount: data.amount,
+                currency: data.currency,
+                name: "AXILEX Electrician System",
+                description: "Wallet Recharge",
+                order_id: data.order_id,
+                handler: function(response) {
+                    fetch('/payment_success', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            order_id: response.razorpay_order_id,
+                            payment_id: response.razorpay_payment_id,
+                            amount: payAmount
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert('✅ Payment successful! ₹' + payAmount + ' added to your wallet.');
+                            location.reload();
+                        } else {
+                            alert('❌ Payment failed: ' + result.error);
+                        }
+                    });
+                },
+                prefill: {
+                    name: "{{ session.user_name }}",
+                    email: "{{ session.user_email }}"
+                },
+                theme: {
+                    color: "#0e7c9e"
+                }
+            };
+            var rzp = new Razorpay(options);
+            rzp.open();
+            closeRechargeModal();
         } else {
-            alert('❌ Payment failed: ' + data.error);
+            alert('Error creating order: ' + data.error);
         }
     });
-}
-</script>
+}</script>
 {% endblock %}

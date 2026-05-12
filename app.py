@@ -5,6 +5,7 @@ import hashlib
 import os
 import re
 import uuid
+import razorpay
 from werkzeug.utils import secure_filename
 from functools import wraps
 
@@ -18,6 +19,13 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 # Create upload folders
 os.makedirs('uploads/job_images', exist_ok=True)
 os.makedirs('uploads/reports', exist_ok=True)
+
+# Razorpay Configuration
+RAZORPAY_KEY_ID = "rzp_test_SoUrgCmPV9QQ1d"
+RAZORPAY_KEY_SECRET = "6GQWWMKC1QPszlA7Lz3LtEyv"
+
+
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
@@ -522,6 +530,68 @@ def wallet_recharge():
         add_notification(session['user_id'], f'Wallet recharged with ₹{amount}!', 'success')
         
         return jsonify({'success': True, 'new_balance': user['wallet_balance']})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ==================== RAZORPAY PAYMENT ROUTES ====================
+
+@app.route('/create_razorpay_order', methods=['POST'])
+@login_required
+def create_razorpay_order():
+    try:
+        data = request.json
+        amount = int(float(data.get('amount', 0)) * 100)
+        
+        if amount <= 0:
+            return jsonify({'success': False, 'error': 'Invalid amount'}), 400
+        
+        order_data = {
+            'amount': amount,
+            'currency': 'INR',
+            'payment_capture': 1,
+            'notes': {
+                'user_id': session['user_id'],
+                'user_email': session['user_email']
+            }
+        }
+        order = razorpay_client.order.create(data=order_data)
+        
+        return jsonify({
+            'success': True,
+            'order_id': order['id'],
+            'amount': amount,
+            'currency': 'INR',
+            'key_id': RAZORPAY_KEY_ID
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/payment_success', methods=['POST'])
+@login_required
+def payment_success():
+    try:
+        data = request.json
+        order_id = data.get('order_id')
+        payment_id = data.get('payment_id')
+        amount = data.get('amount')
+        
+        conn = get_db()
+        conn.execute("UPDATE users SET wallet_balance = wallet_balance + ? WHERE id=?", 
+                    (amount, session['user_id']))
+        
+        payment_record_id = f"razor_{payment_id[:10]}"
+        conn.execute("""
+            INSERT INTO payments (payment_id, amount, payment_type, status, from_user_id, to_user_id)
+            VALUES (?, ?, 'wallet_recharge', 'completed', ?, ?)
+        """, (payment_record_id, amount, session['user_id'], session['user_id']))
+        
+        conn.commit()
+        conn.close()
+        
+        add_notification(session['user_id'], f'Wallet recharged with ₹{amount} via Razorpay!', 'success')
+        
+        return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

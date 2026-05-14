@@ -223,7 +223,6 @@
         border-bottom: 1px solid #f0f0f0;
     }
     
-    /* Electrician View Styles */
     .electrician-view-card {
         background: white;
         border-radius: 8px;
@@ -568,4 +567,7 @@ document.getElementById('payNowBtn').addEventListener('click', function() {
 });
 {% endif %}
 </script>
+
+<!-- Razorpay script - MUST be here, after the content, before closing body -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 {% endblock %}
